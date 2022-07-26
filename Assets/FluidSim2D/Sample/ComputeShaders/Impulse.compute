@@ -1,0 +1,18 @@
+#pragma kernel init_impulse
+
+#define THREAD_NUM 32
+
+RWTexture2D<float4> impulse;
+float4 texel_size;
+float radius;
+float2 position;
+
+[numthreads(THREAD_NUM, THREAD_NUM, 1)]
+void init_impulse(uint2 id : SV_DispatchThreadID)
+{
+    float2 uv = (id + 0.5) * texel_size.xy;
+    float4 color = float4(0.0, 0.0, 0.0, 1.0);
+    float d = distance(position, uv);
+    color.xyz = d < radius ? min((radius - d) * 0.5, 1.0) : 0.0;
+    impulse[id] = color;
+}

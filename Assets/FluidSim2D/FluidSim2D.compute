@@ -1,0 +1,119 @@
+#pragma kernel compute_advect
+#pragma kernel compute_buoyancy
+#pragma kernel compute_impulse
+#pragma kernel compute_divergence
+#pragma kernel compute_jacobi
+#pragma kernel compute_subtract_gradient
+
+#define THREAD_NUM 32
+
+Texture2D<float4> source;
+SamplerState samplersource;
+Texture2D<float4> velocity;
+Texture2D<float4> temperature;
+Texture2D<float4> density;
+Texture2D<float4> divergence;
+Texture2D<float4> pressure;
+Texture2D<float4> obstacles;
+Texture2D<float4> impulse;
+RWTexture2D<float4> output;
+
+float4 texel_size;
+float dissipation;
+float ambient_temperature;
+float time_step;
+float sigma;
+float kappa;
+float half_inverse_cell_size;
+float alpha;
+float inverse_beta;
+float gradient_scale;
+float fill;
+
+[numthreads(THREAD_NUM, THREAD_NUM, 1)]
+void compute_advect(uint2 id : SV_DispatchThreadID)
+{
+    float2 v = velocity[id].xy;
+    float2 coord = (id + 0.5 - v * time_step) * texel_size.xy;
+    float4 result = obstacles[id].x > 0.0
+                        ? 0.0
+                        : dissipation * source.SampleLevel(samplersource, coord, 0);
+    
+    output[id] = result;
+}
+
+[numthreads(THREAD_NUM, THREAD_NUM, 1)]
+void compute_buoyancy(uint2 id : SV_DispatchThreadID)
+{
+    float2 v = velocity[id].xy;
+    float t = temperature[id].x;
+    float d = density[id].x;
+    float2 result = t > ambient_temperature
+                        ? v + (time_step * (t - ambient_temperature) * sigma - d * kappa) * float2(0.0, 1.0)
+                        : v;
+    
+    output[id] = float4(result, 0.0, 1.0);
+}
+
+[numthreads(THREAD_NUM, THREAD_NUM, 1)]
+void compute_impulse(uint2 id : SV_DispatchThreadID)
+{
+    output[id] = max(0, lerp(source[id], fill, impulse[id])).xxxx;
+}
+
+[numthreads(THREAD_NUM, THREAD_NUM, 1)]
+void compute_divergence(uint2 id : SV_DispatchThreadID)
+{
+    float bN = obstacles[id + uint2(0, 1)].x;
+    float bS = obstacles[id - uint2(0, 1)].x;
+    float bE = obstacles[id + uint2(1, 0)].x;
+    float bW = obstacles[id - uint2(1, 0)].x;
+
+    float2 vN = bN > 0.0 ? 0.0 : velocity[id + uint2(0, 1)].xy;
+    float2 vS = bS > 0.0 ? 0.0 : velocity[id - uint2(0, 1)].xy;
+    float2 vE = bE > 0.0 ? 0.0 : velocity[id + uint2(1, 0)].xy;
+    float2 vW = bW > 0.0 ? 0.0 : velocity[id - uint2(1, 0)].xy;
+
+    float result = half_inverse_cell_size * (vE.x - vW.x + vN.y - vS.y);
+    
+    output[id] = float4(result, 0.0, 0.0, 1.0);
+}
+
+[numthreads(THREAD_NUM, THREAD_NUM, 1)]
+void compute_jacobi(uint2 id : SV_DispatchThreadID)
+{
+    float bN = obstacles[id + uint2(0, 1)].x;
+    float bS = obstacles[id - uint2(0, 1)].x;
+    float bE = obstacles[id + uint2(1, 0)].x;
+    float bW = obstacles[id - uint2(1, 0)].x;
+
+    float pC = pressure[id].x;
+    float pN = bN > 0.0 ? pC : pressure[id + uint2(0, 1)].x;
+    float pS = bS > 0.0 ? pC : pressure[id - uint2(0, 1)].x;
+    float pE = bE > 0.0 ? pC : pressure[id + uint2(1, 0)].x;
+    float pW = bW > 0.0 ? pC : pressure[id - uint2(1, 0)].x;
+
+    float bC = divergence[id].x;
+    
+    output[id] = (pW + pE + pS + pN + alpha * bC) * inverse_beta;
+}
+
+[numthreads(THREAD_NUM, THREAD_NUM, 1)]
+void compute_subtract_gradient(uint2 id : SV_DispatchThreadID)
+{
+    float bN = obstacles[id + uint2(0, 1)].x;
+    float bS = obstacles[id - uint2(0, 1)].x;
+    float bE = obstacles[id + uint2(1, 0)].x;
+    float bW = obstacles[id - uint2(1, 0)].x;
+
+    float pC = pressure[id].x;
+    float pN = bN > 0.0 ? pC : pressure[id + uint2(0, 1)].x;
+    float pS = bS > 0.0 ? pC : pressure[id - uint2(0, 1)].x;
+    float pE = bE > 0.0 ? pC : pressure[id + uint2(1, 0)].x;
+    float pW = bW > 0.0 ? pC : pressure[id - uint2(1, 0)].x;
+
+    float2 grad = float2(pE - pW, pN - pS) * gradient_scale;
+    float2 v = velocity[id].xy - grad;
+    
+    output[id] = float4(v, 0.0, 1.0);
+}

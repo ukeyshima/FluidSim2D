@@ -1,0 +1,22 @@
+#pragma kernel init_obstacles
+
+#define THREAD_NUM 32
+
+RWTexture2D<float4> obstacles;
+float4 texel_size;
+float radius;
+float2 position;
+
+[numthreads(THREAD_NUM, THREAD_NUM, 1)]
+void init_obstacles(uint2 id : SV_DispatchThreadID)
+{
+    float2 uv = (id + 0.5) * texel_size.xy;
+    float4 color = float4(0.0, 0.0, 0.0, 1.0);
+    color.xyz += step(id.x, 1);
+    color.xyz += step(texel_size.z - 1, id.x);
+    color.xyz += step(id.y, 1);
+    color.xyz += step(texel_size.w - 1, id.y);
+    color.xyz += step(length(uv - position), radius);
+    color.xyz = min(color.xyz, 1.0);
+    obstacles[id] = color;
+}
