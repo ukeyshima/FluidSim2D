@@ -3,5 +3,12 @@
   "version": "1.0.0",
   "displayName": "FluidSim2D",
   "description": "2d-fluid simulation for Unity",
-  "unity": "2021.3"
+  "unity": "2021.3",
+  "samples": [
+    {
+      "displayName": "Sample",
+      "description": "Sample",
+      "path": "Sample"
+    }
+  ]
 }
