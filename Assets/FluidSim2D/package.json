@@ -1,0 +1,7 @@
+{
+  "name": "com.ukeyshima.fluidsim2d",
+  "version": "1.0.0",
+  "displayName": "FluidSim2D",
+  "description": "2d-fluid simulation for Unity",
+  "unity": "2021.3"
+}
