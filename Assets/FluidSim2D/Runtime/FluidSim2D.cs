@@ -96,10 +96,6 @@ namespace FluidSim2D
         {
             InitKernel();
             InitShaderID();
-        }
-
-        protected virtual void Start()
-        {
             _resolutionFloat = _resolution;
             _texelSize = new Vector4(1f / _resolutionFloat.x, 1f / _resolutionFloat.y, _resolutionFloat.x, _resolutionFloat.y);
             InitRenderTexture();
@@ -265,66 +261,77 @@ namespace FluidSim2D
                 wrapMode = TextureWrapMode.Clamp,
                 enableRandomWrite = true
             };
+            _velocity[0].Create();
             _velocity[1] = new RenderTexture(_resolution.x, _resolution.y, 0, RenderTextureFormat.RGFloat, RenderTextureReadWrite.Linear)
             {
                 filterMode = FilterMode.Bilinear,
                 wrapMode = TextureWrapMode.Clamp,
                 enableRandomWrite = true
             };
+            _velocity[1].Create();
             _temperature[0] = new RenderTexture(_resolution.x, _resolution.y, 0, RenderTextureFormat.RFloat, RenderTextureReadWrite.Linear)
             {
                 filterMode = FilterMode.Bilinear,
                 wrapMode = TextureWrapMode.Clamp,
                 enableRandomWrite = true
             };
+            _temperature[0].Create();
             _temperature[1] = new RenderTexture(_resolution.x, _resolution.y, 0, RenderTextureFormat.RFloat, RenderTextureReadWrite.Linear)
             {
                 filterMode = FilterMode.Bilinear,
                 wrapMode = TextureWrapMode.Clamp,
                 enableRandomWrite = true
             };
+            _temperature[1].Create();
             _density[0] = new RenderTexture(_resolution.x, _resolution.y, 0, RenderTextureFormat.RFloat, RenderTextureReadWrite.Linear)
             {
                 filterMode = FilterMode.Bilinear,
                 wrapMode = TextureWrapMode.Clamp,
                 enableRandomWrite = true
             };
+            _density[0].Create();
             _density[1] = new RenderTexture(_resolution.x, _resolution.y, 0, RenderTextureFormat.RFloat, RenderTextureReadWrite.Linear)
             {
                 filterMode = FilterMode.Bilinear,
                 wrapMode = TextureWrapMode.Clamp,
                 enableRandomWrite = true
             };
+            _density[1].Create();
             _pressure[0] = new RenderTexture(_resolution.x, _resolution.y, 0, RenderTextureFormat.RFloat, RenderTextureReadWrite.Linear)
             {
                 filterMode = FilterMode.Bilinear,
                 wrapMode = TextureWrapMode.Clamp,
                 enableRandomWrite = true
             };
+            _pressure[0].Create();
             _pressure[1] = new RenderTexture(_resolution.x, _resolution.y, 0, RenderTextureFormat.RFloat, RenderTextureReadWrite.Linear)
             {
                 filterMode = FilterMode.Bilinear,
                 wrapMode = TextureWrapMode.Clamp,
                 enableRandomWrite = true
             };
+            _pressure[1].Create();
             _divergence = new RenderTexture(_resolution.x, _resolution.y, 0, RenderTextureFormat.RFloat, RenderTextureReadWrite.Linear)
             {
                 filterMode = FilterMode.Bilinear,
                 wrapMode = TextureWrapMode.Clamp,
                 enableRandomWrite = true
             };
+            _divergence.Create();
             _obstacles = new RenderTexture(_resolution.x, _resolution.y, 0, RenderTextureFormat.RFloat, RenderTextureReadWrite.Linear)
             {
                 filterMode = FilterMode.Bilinear,
                 wrapMode = TextureWrapMode.Clamp,
                 enableRandomWrite = true
             };
+            _obstacles.Create();
             _impulse = new RenderTexture(_resolution.x, _resolution.y, 0, RenderTextureFormat.RFloat, RenderTextureReadWrite.Linear)
             {
                 filterMode = FilterMode.Bilinear,
                 wrapMode = TextureWrapMode.Clamp,
                 enableRandomWrite = true
             };
+            _impulse.Create();
         }
 
         protected virtual void ReleaseRenderTextures()
