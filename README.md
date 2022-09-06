@@ -6,6 +6,8 @@
 
 This project is port of a [GPU-GEMS-2D-Fluid-Simulation](https://github.com/Scrawk/GPU-GEMS-2D-Fluid-Simulation) by Scrawk to a Compute shader. 
 
+The algorithm is described in detail [here](https://prideout.net/blog/old/blog/index.html@p=58.html).
+
 ## Installation
 Window > Package Manager > Add package from git URL
 
